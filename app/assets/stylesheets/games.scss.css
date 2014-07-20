@@ -1,0 +1,68 @@
+#gameplay {
+	padding-top: 30px;
+	width: 100%;
+}
+
+#field {
+	border-collapse: collapse;
+	margin-bottom: 30px
+}
+
+#field tr {
+	border: 1px solid black;
+}
+
+#field tr td {
+	width: 60px;
+	height: 30px;
+}
+
+#field tr:nth-child(7) {
+	border-bottom: 2px solid black;
+}
+
+.you-field {
+	border-left: 1px dotted black;
+}
+
+.them-base {
+	background: #ffbebe;
+}
+
+.you-base {
+	background: #BDD8F0;
+}
+
+.them-position:before {
+	color: #FF0000;
+}
+
+.you-position:before {
+	color: #203864;
+}
+
+#them-name {
+	clear:both;
+}
+
+[class$='position']:before {
+	content: '⬤';
+	text-align: center;
+	margin-left: 20px;
+}
+
+[id$='portion'] {
+	float: left;
+}
+
+#field-portion {
+	width: 30%;
+}
+
+#action-portion {
+	width: 70%;
+}
+
+.block {
+	background: #dddddd;
+}

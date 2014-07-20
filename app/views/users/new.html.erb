@@ -1,0 +1,8 @@
+<div id="enter-name">
+  Enter your name:
+
+  <%= form_for User.new do |f| %>
+    <%= f.text_field :name %>
+    <%= f.submit "Play!" %>
+  <% end %>
+</div>

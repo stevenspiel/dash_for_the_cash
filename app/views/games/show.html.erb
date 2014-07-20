@@ -1,0 +1,61 @@
+<%= javascript_include_tag params[:controller] %>
+<%= subscribe_to action_game_path %>
+
+<div id="you-name"><%= @you.name %></div>
+
+<div id="gameplay">
+  <% if @game.opponent_accepted %>
+    <div id="field-portion">
+      <table id="field">
+        <tr class="base them-base">
+          <td class="them-field" id="<%= @them.id %>_0"></td>
+          <td class="you-field" id="<%= @you.id %>_13"></td>
+        </tr>
+        
+        <% 12.times do |n| %>
+          <tr class="battle-fields">
+            <td class="field them-field" id="<%= @them.id %>_<%= n + 1 %>"></td>
+            <td class="field you-field" id="<%= @you.id %>_<%= 12 - n %>"></td>
+          </tr>
+        <% end %>
+
+        <tr class="base you-base">
+          <td class="them-field" id="<%= @them.id %>_13"></td>
+          <td class="you-field" id="<%= @you.id %>_0"></td>
+        </tr>
+      </table>
+    </div>
+    <div id="action-portion">
+      <% @actions.each do |action, name| %>
+        <% method = name == "Reset" ? :delete : :post %>
+        <%= button_to name, play_game_path(@game, 
+            data: { 
+              action: action, 
+              played_by_id: @you.id, 
+              played_on_id: @them.id , 
+              game_id: @game.id}), 
+            method: method, remote: true
+        %>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render partial: 'waiting' %>
+  <% end %>
+
+</div>
+
+<div id="them-name"><%= @them.name %></div>
+
+<script>
+  window.turnTo(<%= @game.turn_id %>);
+
+  <% @you.blocks.each do |block| %>
+    window.blocks(<%= @you.id %>, <%= block.position %>)
+  <% end %>
+
+  <% [@you, @them].each do |player| %>
+    window.base(<%= player.id %>, <%= player.base_position %>)
+    window.move(<%= player.id %>, <%= player.position %>);
+  <% end %>
+</script>
+

@@ -1,0 +1,17 @@
+<div id="users-present" style="display:<%= @users.any? ? 'block' : 'none' %>">
+  Select an opponent.
+</div>
+
+<div id="users-absent" style="display:<%= @users.any? ? 'none' : 'block' %>">
+  Looks like no one else is online.
+</div>
+
+<ul id="opponents">
+  <%= render @users %>
+</ul>
+
+<%= hidden_field_tag "current_user", @current_user.id %>
+
+<%= subscribe_to new_user_path %>
+<%= subscribe_to new_game_path %>
+<%#= subscribe_to unavailable_user_path %>
