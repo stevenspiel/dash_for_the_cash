@@ -13,6 +13,7 @@ gem 'private_pub'
 gem 'faye'
 gem 'thin'
 gem 'foreman'
+gem 'heroku'
 
 group :development do
   gem 'capistrano-ext'
