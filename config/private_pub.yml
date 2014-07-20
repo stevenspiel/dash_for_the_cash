@@ -6,5 +6,5 @@ test:
   secret_token: "secret"
 production:
   server: "http://dashfayserver.herokuapp.com/"
-  secret_token: "secret"
+  secret_token: <%= ENV['PRIVATE_PUB'] || "secret_token" %>
   signature_expiration: 3600 # one hour
