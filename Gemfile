@@ -12,10 +12,15 @@ gem 'jbuilder', '~> 1.2'
 gem 'private_pub'
 gem 'faye'
 gem 'thin'
+gem 'foreman'
 
 group :development do
   gem 'capistrano-ext'
   gem 'capistrano'
+end
+
+group :production do
+  gem 'rails_12factor'
 end
 
 gem 'pry', group: [:development, :test]

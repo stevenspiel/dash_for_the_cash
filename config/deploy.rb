@@ -1,8 +1,9 @@
+require 'capistrano/ext/multistage'
 # config valid only for Capistrano 3.1
 lock '3.2.1'
 
 set :application, 'dash'
-set :repo_url, 'git@example.com:me/my_repo.git'
+set :repo_url, 'https://github.com/stevenspiel/dash_for_the_cash.git'
 
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
@@ -12,6 +13,11 @@ set :repo_url, 'git@example.com:me/my_repo.git'
 
 # Default value for :scm is :git
 set :scm, :git
+
+set :user, "stevenspiel"
+
+set :stages, ["staging", "production"]
+set :default_stage, "staging"
 
 # Default value for :format is :pretty
 # set :format, :pretty

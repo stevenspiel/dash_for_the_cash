@@ -1,5 +1,5 @@
 log/*.log
 tmp/**/*
 config/*.yml
-config/initializers/secret_token.rb
 config/secrets.yml
+.env
