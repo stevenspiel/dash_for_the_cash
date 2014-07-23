@@ -2,7 +2,7 @@ class Game < ActiveRecord::Base
 
   has_many   :players,   dependent:  :destroy
   has_many   :blocks,    dependent:  :destroy
-  has_many   :moves,     dependent:  :destroy
+  has_many   :actions,   dependent:  :destroy
   has_one    :winner,    class_name: 'User',   foreign_key: "winner_id"
   belongs_to :turn,      class_name: 'Player', foreign_key: "turn_id"
   belongs_to :initiator, class_name: 'User',   foreign_key: "initiator_id"
