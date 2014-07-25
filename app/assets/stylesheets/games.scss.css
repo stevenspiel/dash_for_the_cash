@@ -52,12 +52,16 @@
 	right: 0;
 	bottom: 0;
 	background: #BDD8F0;
+	border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
 }
 
 #you-name-container {
 	left: 0;
 	top: 0;
 	background: #ffbebe;
+	border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
 [class$='position']:before {
