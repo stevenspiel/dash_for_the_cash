@@ -9,4 +9,4 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-Dash::Application.config.secret_key_base = ENV['SECRET_TOKEN']
+Dash::Application.config.secret_key_base = ENV['SECRET_TOKEN'] || 'secret'
