@@ -1,11 +1,13 @@
 #gameplay {
-	padding-top: 30px;
+	padding-top: 75px;
 	width: 100%;
 }
 
 #field {
 	border-collapse: collapse;
-	margin-bottom: 30px
+	margin-bottom: 30px;
+	float:right;
+	margin-right: 20px
 }
 
 #field tr {
@@ -13,8 +15,8 @@
 }
 
 #field tr td {
-	width: 60px;
-	height: 30px;
+	width: 50px;
+	height: 25px;
 }
 
 #field tr:nth-child(7) {
@@ -41,14 +43,28 @@
 	color: #203864;
 }
 
-#them-name {
-	clear:both;
+[id$='name-container'] {
+	position: absolute;
+	padding: 15px 15px;
+}
+
+#them-name-container {
+	right: 0;
+	bottom: 0;
+	background: #BDD8F0;
+}
+
+#you-name-container {
+	left: 0;
+	top: 0;
+	background: #ffbebe;
 }
 
 [class$='position']:before {
 	content: '⬤';
+	font-size: 0.75em;
 	text-align: center;
-	margin-left: 20px;
+	margin-left: 18px;
 }
 
 [id$='portion'] {
@@ -56,13 +72,33 @@
 }
 
 #field-portion {
-	width: 30%;
+	width: 55%;
 }
 
 #action-portion {
-	width: 70%;
+	width: 45%;
+	padding-top: 98px;
 }
 
 .block {
 	background: #dddddd;
+}
+
+.you-button {
+	margin-left: 20px;
+  background: #2e75b6;
+  border: medium none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: bold;
+  margin: 3px;
+  padding: 6.5px;
+  width: 95px;
+  cursor: pointer;
+}
+
+.you-button:disabled {
+	opacity: .5;
+	cursor: default;
 }

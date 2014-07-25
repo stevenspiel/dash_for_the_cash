@@ -1,7 +1,11 @@
 <%= javascript_include_tag params[:controller] %>
 <%= subscribe_to action_game_path %>
 
-<div id="you-name"><%= @you.name %></div>
+<div id="them-name-container">
+  <strong id="them-name">
+    <%= @them.name %>
+  </strong>
+</div>
 
 <div id="gameplay">
   <% if @game.opponent_accepted %>
@@ -34,7 +38,7 @@
               played_by_id: @you.id, 
               played_on_id: @them.id , 
               game_id: @game.id}), 
-            method: method, remote: true
+            method: method, remote: true, class: 'you-button'
         %>
       <% end %>
     </div>
@@ -44,7 +48,11 @@
 
 </div>
 
-<div id="them-name"><%= @them.name %></div>
+<div id="you-name-container">
+  <strong id="you-name">
+    <%= @you.name %>
+  </strong>
+</div>
 
 <script>
   window.turnTo(<%= @game.turn_id %>);
