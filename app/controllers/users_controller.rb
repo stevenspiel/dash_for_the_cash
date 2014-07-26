@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
 
   def index
-    @current_user = User.find(session[:user_id])
+    @current_user = User.find_by(id: session[:user_id])
 
     if !User.valid_session_id?(session) || !@current_user
       redirect_to :root
