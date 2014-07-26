@@ -17,5 +17,5 @@
 <%= subscribe_to availability_users_path %>
 
 <script>
-  window.nameListed(<%= @current_user.id %>, $('li'))
+  window.nameListed(<%= @current_user.id %>, <%= @available_users.map(&:id) %>)
 </script>

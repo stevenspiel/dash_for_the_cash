@@ -1,18 +1,12 @@
 class User < ActiveRecord::Base
 
-  has_many :players
-  has_many :games
+  has_many :players, dependent: :destroy
+  has_many :games,   dependent: :destroy
 
   scope :available, -> { where(available: true) }
 
   def self.delete
     User.all.each(&:destroy)
-  end
-
-  def self.delete_everything!
-    [Action,Trap,BasePosition,Player,Game,User].each do |model|
-      model.all.each(&:destroy)
-    end
   end
 
   def self.valid_session_id?(session)
