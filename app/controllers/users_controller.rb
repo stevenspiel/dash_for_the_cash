@@ -1,11 +1,12 @@
 class UsersController < ApplicationController
 
   def index
-    if !User.valid_session_id?(session)
+    
+    if !User.valid_session_id?(session) || !User.find(session[:user_id])
       redirect_to :root
     else
-      @current_user = User.find(session[:user_id])
       @users = User.available - [@current_user]
+      @current_user = User.find(session[:user_id])
     end
   end
 

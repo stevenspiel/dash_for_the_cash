@@ -32,3 +32,8 @@ window.removeUser = (userId) ->
   if $('li').length == 0
     $("#users-present").hide()
     $("#users-absent").show()
+
+window.nameListed = (userId, elements) ->
+  idsArray = $.map($("li"), (li) -> parseInt(li.id) )
+  if userId not in idsArray
+    window.location.replace('/')
