@@ -1,17 +1,21 @@
 class UsersController < ApplicationController
 
   def index
-    
-    if !User.valid_session_id?(session) || !User.find(session[:user_id])
+    @current_user = User.find(session[:user_id])
+
+    if !User.valid_session_id?(session) || !@current_user
       redirect_to :root
     else
-      @users = User.available - [@current_user]
-      @current_user = User.find(session[:user_id])
+      @available_users = User.available
+      @users = @available_users - [@current_user]
     end
   end
 
   def create
     @user = User.create!(name: params[:user][:name])
+    if session[:user_id] && User.find(session[:user_id])
+      User.find(session[:user_id]).update_availability(false)
+    end
     session[:user_id] = @user.id
 
     PrivatePub.publish_to("/users/new", user: @user)

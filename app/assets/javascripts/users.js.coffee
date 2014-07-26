@@ -16,10 +16,9 @@ PrivatePub.subscribe "/users/new", (data, channel) ->
   userId = data.user.id
   window.addUser(userId, userName)
 
-PrivatePub.subscribe "users/availability", (data, channel) ->
-  userName = data.user.name
+PrivatePub.subscribe "/users/availability", (data, channel) ->
   userId = data.user.id
-  window.removeUser(userId, userName)
+  window.removeUser(userId)
 
 window.addUser = (userId, userName) ->
   $("#opponents").append("<li id=#{userId}><a href='/games/new?opponent_id=#{userId}'>#{userName}</a></li>")
@@ -34,6 +33,5 @@ window.removeUser = (userId) ->
     $("#users-absent").show()
 
 window.nameListed = (userId, elements) ->
-  idsArray = $.map($("li"), (li) -> parseInt(li.id) )
-  if userId not in idsArray
+  if userId not in elements
     window.location.replace('/')
