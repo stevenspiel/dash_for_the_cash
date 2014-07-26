@@ -1,7 +1,6 @@
-class Block < ActiveRecord::Base
+class Trap < ActiveRecord::Base
   validates :position, presence: true
 
   belongs_to :player
-  belongs_to :game
 
 end

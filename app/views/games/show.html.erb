@@ -1,5 +1,6 @@
 <%= javascript_include_tag params[:controller] %>
-<%= subscribe_to action_game_path %>
+<%= subscribe_to action_game_path(@game.id) %>
+<%= subscribe_to action_player_path(@you.id) %>
 
 <div id="them-name-container">
   <strong id="them-name">
@@ -57,12 +58,13 @@
 <script>
   window.turnTo(<%= @game.turn_id %>);
 
-  <% @you.blocks.each do |block| %>
-    window.blocks(<%= @you.id %>, <%= block.position %>)
+  <% @you.active_traps.each do |trap| %>
+    window.traps(<%= @you.id %>, <%= trap.position %>);
   <% end %>
 
+  window.base(<%= @you.id %>, <%= @you.base_position %>);
+
   <% [@you, @them].each do |player| %>
-    window.base(<%= player.id %>, <%= player.base_position %>)
     window.move(<%= player.id %>, <%= player.position %>);
   <% end %>
 </script>

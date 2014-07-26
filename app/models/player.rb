@@ -2,23 +2,41 @@ class Player < ActiveRecord::Base
   belongs_to :user
   belongs_to :game
 
-  has_many :actions, dependent:  :destroy
-  has_many :blocks,  dependent:  :destroy
+  has_many :actions,        dependent:  :destroy
+  has_many :traps,          dependent:  :destroy
+  has_many :base_positions, dependent:  :destroy
 
   delegate :name, to: :user
-
-  scope :actions, -> { where(game: game) }
-  scope :blocks,  -> { where(game: game) }
 
   def defend?
     return false if actions.none?
     actions.last.action == "defend"
   end
 
-  def skipped_block?(old_position, roll, blocks = [])
+  def skipped_trap(roll, old_position, traps = [])
     new_position = old_position + roll
-    blocks.any? do |block|
-      block.position.between?(old_position, new_position)
+    active_traps.find do |trap|
+      (12 - trap.position).between?(old_position, new_position)
     end
+  end
+
+  def base_position
+    base_positions.order("position DESC").try(:first).try(:position) || 0
+  end
+
+  def can_move_base?
+    base_position == position
+  end
+
+  def can_place_trap?
+    position != 0 && !trap_at_position?
+  end
+
+  def trap_at_position?
+    traps.any?{ |trap| trap.position == position }
+  end
+
+  def active_traps
+    traps.select{ |trap| trap.active? }
   end
 end

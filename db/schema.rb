@@ -11,22 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140719021613) do
+ActiveRecord::Schema.define(version: 20140725201650) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "actions", force: true do |t|
     t.string   "action"
-    t.integer  "game_id"
     t.integer  "player_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "blocks", force: true do |t|
-    t.integer  "position"
-    t.integer  "game_id"
+  create_table "base_positions", force: true do |t|
+    t.integer  "position",   default: 0, null: false
     t.integer  "player_id"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -45,10 +43,17 @@ ActiveRecord::Schema.define(version: 20140719021613) do
   create_table "players", force: true do |t|
     t.integer  "user_id"
     t.integer  "game_id"
-    t.integer  "position",      default: 0,     null: false
-    t.integer  "base_position", default: 0,     null: false
-    t.boolean  "winner",        default: false, null: false
-    t.boolean  "defend",        default: false, null: false
+    t.integer  "position",   default: 0,     null: false
+    t.boolean  "winner",     default: false, null: false
+    t.boolean  "defend",     default: false, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "traps", force: true do |t|
+    t.integer  "player_id"
+    t.integer  "position",                  null: false
+    t.boolean  "active",     default: true
     t.datetime "created_at"
     t.datetime "updated_at"
   end

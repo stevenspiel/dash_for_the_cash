@@ -28,40 +28,54 @@ class GamesController < ApplicationController
   end
 
   def show
-    @game = Game.find params[:id]
-    @you  = @game.you(current_user)
-    @them = @game.them(current_user)
-    @actions = {
-      move:   'Move 1 Space',
-      roll:   'Roll Die',
-      defend: 'Defend',
-      base:   'Move Base',
-      trap:   'Place Trap',
-      reset:  'Reset' 
-    }
+    unless Game.find_by(id: params[:id]) && User.valid_session_id?(session)
+      redirect_to :root
+    else
+      @game = Game.find params[:id]
+      @you  = @game.you(current_user)
+      @them = @game.them(current_user)
+      @actions = {
+        move:   'Move 1 Space',
+        roll:   'Roll Die',
+        defend: 'Defend',
+        base:   'Move Base',
+        trap:   'Place Trap',
+      }
+      @actions[:reset] = "Reset" unless Rails.env.production?
+    end
   end
 
   def play
-    action     = params[:data][:action]
-    game       = Game.find(params[:data][:game_id])
-    played_by  = Player.find(params[:data][:played_by_id])
-    played_on  = Player.find(params[:data][:played_on_id])
-    javascript = ""
-    alerts     = ""
+    halt_gameplay   = false
+    action          = params[:data][:action]
+    game            = Game.find(params[:data][:game_id])
+    played_by       = Player.find(params[:data][:played_by_id])
+    played_on       = Player.find(params[:data][:played_on_id])
+    javascript      = ""
+    alert           = ""
+    me_javascript   = ""
+    them_javascript = ""
 
     case action 
     when "move"
       played_by.update_attribute(:position, played_by.position + 1)
 
     when "roll"
-      old_position = played_by.position
-      blocks = played_by.blocks
-
       roll = rand(1..6)
       roll = (13 - played_by.position) if (played_by.position + roll) > 13
 
-      if played_on.defend? || played_by.skipped_block?(old_position, roll, blocks)
-        new_position = played_by.base_position 
+      old_position = played_by.position
+      traps = played_on.active_traps
+      skipped_trap = played_by.skipped_trap(roll, old_position, traps)
+
+      if played_on.defend?
+        new_position = played_by.base_position
+        me_javascript = "alert('#{played_on.name} defended!');" 
+      elsif skipped_trap.present?
+        skipped_trap.update_attribute(:active, false)
+        new_position = played_by.base_position
+        me_javascript = "alert('You hit a trap!');"
+        them_javascript = "window.removeTrap(#{played_on.id}, #{skipped_trap.position})"
       else
         new_position = (played_by.position + roll)
       end
@@ -69,38 +83,55 @@ class GamesController < ApplicationController
       played_by.update_attribute(:position, new_position)
 
     when "base"
-      played_by.update_attribute(:base_position, played_by.position)
-      javascript = "window.base(#{played_by.id}, #{played_by.position});" +
-                   "window.blocks(#{played_by.id}, #{played_by.position})"
+      if played_by.can_move_base?
+        message = "You cannot move your base any further"
+        me_javascript = "alert('#{message}');"
+        halt_gameplay = true
+      else
+        played_by.base_positions.create!(position: played_by.position)
+        me_javascript = "window.base(#{played_by.id}, #{played_by.position});"
+      end
 
     when "trap"
-      # TODO: disable if at starting position
-      played_by.blocks.create!(position: played_by.position, game: game)
-      javascript = "window.blocks(#{played_by.id}, #{played_by.position});"
+      if played_by.can_place_trap?
+        played_by.traps.create!(position: played_by.position)
+        me_javascript = "window.traps(#{played_by.id}, #{played_by.position});"
+      else
+        message = "You cannot place a trap here "
+        me_javascript = "alert('#{message}');"
+        halt_gameplay = true
+      end
 
     when "reset"
       [played_by, played_on].each do |player|
-        player.update_attributes(position: 0, base_position: 0)
-        player.blocks.destroy
-        player.actions.destroy
+        player.traps.each{|trap| trap.update_attribute(:active, false)}
+        player.base_positions.each(&:destroy)
+        player.actions.each(&:destroy)
         javascript += "window.baseReset(#{player.id}, #{player.position});" +
-                      "window.blocksReset(#{player.id}, #{player.position});"
+                      "window.trapsReset(#{player.id}, #{player.position});"
       end
     end
 
-    if played_by.position == 13
-      alerts = "alert('<%= played_by.user.name.upcase %> WINS!');"
+    if played_by.position >= 13
+      alert = "alert('#{played_by.user.name.upcase} WINS!');"+
+              "window.location.replace('#{users_path}');"
     end
 
-    PrivatePub.publish_to(action_game_path,
-      javascript +
-      "window.move(#{played_by.id}, #{played_by.position});"+
-      "window.turnTo(#{played_on.id});"+
-      alerts
-    )
+    PrivatePub.publish_to(action_player_path(played_by.id), me_javascript)
 
-    game.update_attribute(:turn, played_on)
-    played_by.actions.create!(action: action, game: game)
+    PrivatePub.publish_to(action_player_path(played_on.id), them_javascript)    
+
+    unless halt_gameplay
+      PrivatePub.publish_to(action_game_path(game.id),
+        javascript +
+        "window.move(#{played_by.id}, #{played_by.position});"+
+        "window.turnTo(#{played_on.id});"+
+        alert
+      )
+
+      played_by.actions.create!(action: action)
+      game.update_attribute(:turn, played_on)
+    end
   end
 
   def opponent_decision
@@ -111,7 +142,7 @@ class GamesController < ApplicationController
 
     if params[:answer] == "true"
       # update both opponent and initiators' available statuses
-      # publish to Privat Pub and remove their listings
+      # publish to Private Pub and remove their listings
 
       @game.update_attribute(:opponent_accepted, true)
 
@@ -127,7 +158,7 @@ class GamesController < ApplicationController
       @opponent.update_attribute(:available, true)
 
       PrivatePub.publish_to("/games/opponent_decision/#{@game.id}", 
-        "window.location.href('#{users_path}');"
+        "window.location.replace('#{users_path}');"
       )
     end
   end

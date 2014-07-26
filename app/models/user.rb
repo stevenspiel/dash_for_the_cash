@@ -10,9 +10,13 @@ class User < ActiveRecord::Base
   end
 
   def self.delete_everything
-    [User,Game,Action,Block,Player].each do |model|
+    [User,Game,Action,Trap,Player,BasePosition].each do |model|
       model.all.each(&:destroy)
     end
+  end
+
+  def self.valid_session_id?(session)
+    session[:user_id] && User.find_by(id: session[:user_id]).present?
   end
   
 end

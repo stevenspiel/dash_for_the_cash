@@ -10,4 +10,10 @@ Dash::Application.routes.draw do
       post :opponent_decision
     end
   end
+
+  resources :players do
+    member do
+      post :action
+    end
+  end
 end

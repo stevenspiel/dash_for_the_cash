@@ -21,11 +21,15 @@ window.baseReset = (playerId, basePosition) ->
   for position in [1..12]
     $("##{playerId}_#{position}").removeClass("#{player}-base")
 
-window.blocks = (playerId, blockPosition) ->
+window.traps = (playerId, trapPosition) ->
   player = $("[id^='#{playerId}']").attr('class').split('-')[0]
-  $("##{playerId}_#{blockPosition}").siblings().addClass("block")
+  $("##{playerId}_#{trapPosition}").siblings().addClass("trap")
 
-window.blocksReset = (playerId, basePosition) ->
+window.removeTrap = (playerId, trapPosition) ->
+  player = $("[id^='#{playerId}']").attr('class').split('-')[0]
+  $("##{playerId}_#{trapPosition}").siblings().addClass("trap")
+  
+window.trapsReset = (playerId, basePosition) ->
   player = $("[id^='#{playerId}']").attr('class').split('-')[0]
   for position in [1..12]
-    $("##{playerId}_#{position}").removeClass("block")
+    $("##{playerId}_#{position}").removeClass("trap")

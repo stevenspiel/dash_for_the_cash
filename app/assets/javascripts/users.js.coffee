@@ -7,15 +7,16 @@ PrivatePub.subscribe "/users/new", (data, channel) ->
 
 PrivatePub.subscribe "/games/new", (data, channel) ->
   currentUserId = parseInt($('#current_user').val())
-  answer = false
+  # answer = false
 
   if currentUserId != data.initiator_id
-    if confirm(data.initiator_name + ' wants to play a game with you. Accept?')
-      answer = true
+    # if confirm(data.initiator_name + ' wants to play a game with you. Accept?')
+      # answer = true
+    alert(data.initiator_name + ' wants to play a game with you!')
     $.ajax "/games/#{data.game.id}/opponent_decision",
       type: 'POST'
       dataType: 'html'
-      data: { answer: answer, opponent_id: data.opponent_id, game_id: data.game.id, initiator_id: data.initiator_id }
+      data: { answer: true, opponent_id: data.opponent_id, game_id: data.game.id, initiator_id: data.initiator_id }
       error: (jqXHR, textStatus, errorThrown) ->
         console.log(errorThrown)
         console.log(errorThrown)
