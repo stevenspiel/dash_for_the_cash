@@ -5,13 +5,10 @@ class GamesController < ApplicationController
     opponent = User.find(params[:opponent_id])
     
     @game = Game.create!(initiator: initiator, opponent: opponent)
-    @game.players.create!(user: initiator)
-    @game.players.create!(user: opponent)
+    @you = @game.players.create!(user: initiator)
+    @them = @game.players.create!(user: opponent)
     @game.update_attribute(:turn_id, @game.players.first.id)
-
-    PrivatePub.publish_to("/users/set_availability", 
-      unavailable: [initiator]
-    )
+    initiator.update_availability(false)    
 
     PrivatePub.publish_to("/games/new", 
       game: @game, 
@@ -20,9 +17,6 @@ class GamesController < ApplicationController
       initiator_id: initiator.id,
       opponent_id: opponent.id
     )
-
-    @you = initiator
-    @them = opponent
 
     redirect_to @game
   end
@@ -113,6 +107,8 @@ class GamesController < ApplicationController
     end
 
     if played_by.position >= 13
+      @played_on.update_availability(true)
+      @played_by.update_availability(true)
       alert = "alert('#{played_by.user.name.upcase} WINS!');"+
               "window.location.replace('#{users_path}');"
     end
@@ -141,8 +137,7 @@ class GamesController < ApplicationController
     @opponent  = User.find params[:opponent_id]
 
     if params[:answer] == "true"
-      # update both opponent and initiators' available statuses
-      # publish to Private Pub and remove their listings
+      @opponent.update_availability(false)
 
       @game.update_attribute(:opponent_accepted, true)
 
@@ -154,8 +149,8 @@ class GamesController < ApplicationController
     else
       @game.destroy
 
-      @initiator.update_attribute(:available, true)
-      @opponent.update_attribute(:available, true)
+      @initiator.update_availability(true)
+      @opponent.update_availability(true)
 
       PrivatePub.publish_to("/games/opponent_decision/#{@game.id}", 
         "window.location.replace('#{users_path}');"

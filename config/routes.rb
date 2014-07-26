@@ -1,11 +1,15 @@
 Dash::Application.routes.draw do
   root to: 'users#new'
-  resources :users 
+
+  resources :users do
+    collection do
+      post :availability
+    end
+  end
 
   resources :games do
     member do
       post :play
-      delete :play
       post :action
       post :opponent_decision
     end

@@ -16,9 +16,4 @@ class UsersController < ApplicationController
     PrivatePub.publish_to("/users/new", user: @user)
     redirect_to :users
   end
-
-  def update
-    # PrivatePub.publish_to("/users/available", user: @user) if params[:available]
-    # PrivatePub.publish_to("/users/unavailable", user: @user) if params[:unavailable]
-  end
 end
