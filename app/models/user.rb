@@ -3,7 +3,7 @@ class User < ActiveRecord::Base
   has_many :players
   has_many :games
 
-  scope :available, -> { where(available: true) }
+  scope :available, -> { where("available = ? AND updated_at >= ?", true, Time.now - 1.hour) }
 
   def self.delete
     User.all.each(&:destroy)
