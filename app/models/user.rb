@@ -19,5 +19,11 @@ class User < ActiveRecord::Base
       user: self
     )
   end
+
+  def self.delete_everything!
+    [Action,Trap,BasePosition,Player,Game,User].each do |model|
+      model.all.each(&:destroy)
+    end
+  end
   
 end
