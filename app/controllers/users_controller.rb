@@ -13,7 +13,8 @@ class UsersController < ApplicationController
 
   def create
     @user = User.create!(name: params[:user][:name])
-    if session[:user_id] && User.find(session[:user_id])
+
+    if session[:user_id] && User.find_by(id: session[:user_id])
       User.find(session[:user_id]).update_availability(false)
     end
     session[:user_id] = @user.id
