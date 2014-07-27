@@ -15,7 +15,7 @@ class Player < ActiveRecord::Base
 
   def skipped_trap(roll, old_position, traps = [])
     new_position = old_position + roll
-    active_traps.find do |trap|
+    traps.find do |trap|
       (12 - trap.position).between?(old_position, new_position)
     end
   end
