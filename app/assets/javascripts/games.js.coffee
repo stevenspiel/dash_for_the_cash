@@ -22,14 +22,11 @@ window.baseReset = (playerId, basePosition) ->
     $("##{playerId}_#{position}").removeClass("#{player}-base")
 
 window.traps = (playerId, trapPosition) ->
-  player = $("[id^='#{playerId}']").attr('class').split('-')[0]
   $("##{playerId}_#{trapPosition}").siblings().addClass("trap")
 
 window.removeTrap = (playerId, trapPosition) ->
-  player = $("[id^='#{playerId}']").attr('class').split('-')[0]
-  $("##{playerId}_#{trapPosition}").siblings().addClass("trap")
+  $("##{playerId}_#{trapPosition}").siblings().removeClass("trap")
   
 window.trapsReset = (playerId, basePosition) ->
-  player = $("[id^='#{playerId}']").attr('class').split('-')[0]
   for position in [1..12]
     $("##{playerId}_#{position}").removeClass("trap")

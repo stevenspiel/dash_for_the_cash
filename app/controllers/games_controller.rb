@@ -69,7 +69,7 @@ class GamesController < ApplicationController
         skipped_trap.update_attribute(:active, false)
         new_position = played_by.base_position
         me_javascript = "alert('You hit a trap!');"
-        them_javascript = "window.removeTrap(#{played_on.id}, #{skipped_trap.position})"
+        them_javascript = "window.removeTrap(#{played_on.id}, #{skipped_trap.position});"
       else
         new_position = (played_by.position + roll)
       end
