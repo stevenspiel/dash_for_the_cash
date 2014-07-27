@@ -107,8 +107,8 @@ class GamesController < ApplicationController
     end
 
     if played_by.position >= 13
-      @played_on.update_availability(true)
-      @played_by.update_availability(true)
+      played_on.update_availability(true)
+      played_by.update_availability(true)
       alert = "alert('#{played_by.user.name.upcase} WINS!');"+
               "window.location.replace('#{users_path}');"
     end
