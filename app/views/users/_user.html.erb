@@ -1,3 +1,4 @@
 <li id="<%= user.id %>">
   <%= link_to user.name, new_game_path(opponent_id: user.id) %>
+  <%= "<span class='already-played'> - played #{time_ago_in_words(played_user_on)} ago.</span>".html_safe if played_user_on %>
 </li>

@@ -7,7 +7,9 @@
 </div>
 
 <ul id="opponents">
-  <%= render @users %>
+  <% @users.each do |user| %>
+    <%= render @users, played_user_on: @current_user.date_played(user) %>
+  <% end %>
 </ul>
 
 <%= hidden_field_tag "current_user", @current_user.id %>

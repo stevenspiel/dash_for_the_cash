@@ -2,3 +2,8 @@ ul#opponents {
 	list-style: none;
 	padding: 0;
 }
+
+.already-played {
+  font-size: .8em;
+  color: #888;
+}
