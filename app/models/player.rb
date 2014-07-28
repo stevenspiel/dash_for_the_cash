@@ -2,6 +2,8 @@ class Player < ActiveRecord::Base
   belongs_to :user
   belongs_to :game
 
+  has_one :game, foreign_key: 'turn_id'
+
   has_many :actions,        dependent:  :destroy
   has_many :traps,          dependent:  :destroy
   has_many :base_positions, dependent:  :destroy

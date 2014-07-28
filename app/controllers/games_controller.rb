@@ -109,7 +109,7 @@ class GamesController < ApplicationController
     if played_by.position >= 13
       played_on.user.update_availability(true)
       played_by.user.update_availability(true)
-      game.update_attribute(:winner, played_by.user)
+      game.update_attribute(:winner_id, played_by.user)
       alert = "alert('#{played_by.user.name.upcase} WINS!');"+
               "window.location.replace('#{users_path}');"
     end
