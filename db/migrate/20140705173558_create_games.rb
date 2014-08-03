@@ -4,7 +4,6 @@ class CreateGames < ActiveRecord::Migration
       t.integer :initiator_id
       t.integer :opponent_id
       t.boolean :opponent_accepted, default: false
-      t.integer :turn_id
       t.integer :winner_id
       
       t.timestamps

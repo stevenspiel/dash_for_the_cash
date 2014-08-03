@@ -2,6 +2,9 @@ Dash::Application.routes.draw do
   root to: 'users#new'
 
   resources :users do
+    member do
+      post :update_availability
+    end
     collection do
       post :availability
     end
@@ -10,8 +13,10 @@ Dash::Application.routes.draw do
   resources :games do
     member do
       post :play
+      post :ready
       post :action
       post :opponent_decision
+      delete :play
     end
   end
 

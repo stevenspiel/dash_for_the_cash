@@ -14,6 +14,7 @@ gem 'faye'
 gem 'thin'
 gem 'foreman'
 gem 'heroku'
+gem 'google-api-omniauth'
 
 group :development do
   gem 'capistrano-ext'
@@ -24,4 +25,7 @@ group :production do
   gem 'rails_12factor'
 end
 
-gem 'pry', group: [:development, :test]
+group :development, :test do
+  gem 'pry'
+  gem 'pry-nav'
+end

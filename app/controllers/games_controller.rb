@@ -7,7 +7,6 @@ class GamesController < ApplicationController
     @game = Game.create!(initiator: initiator, opponent: opponent)
     @you = @game.players.create!(user: initiator)
     @them = @game.players.create!(user: opponent)
-    @game.update_attribute(:turn_id, @game.players.first.id)
     initiator.update_availability(false)    
 
     PrivatePub.publish_to("/games/new", 
@@ -39,96 +38,132 @@ class GamesController < ApplicationController
     end
   end
 
+  def ready
+    player_id = params[:data][:player_id]
+    game_id   = params[:data][:game_id]
+    game      = Game.find(game_id)
+
+    Player.find(player_id).update_attribute(:ready, true)
+
+    if game.players_ready?
+      PrivatePub.publish_to(action_game_path(game_id), "window.beginRound();")
+    else
+      PrivatePub.publish_to(action_player_path(player_id), "window.playerReady();")
+    end
+  end
+
   def play
-    halt_gameplay   = false
-    action          = params[:data][:action]
-    game            = Game.find(params[:data][:game_id])
-    played_by       = Player.find(params[:data][:played_by_id])
-    played_on       = Player.find(params[:data][:played_on_id])
-    javascript      = ""
-    alert           = ""
-    me_javascript   = ""
-    them_javascript = ""
+    action        = params[:move]
+    game          = Game.find(params[:id])
+    player        = Player.find(params[:playerId])
+    opponent      = Player.find(params[:opponentId])
 
-    case action 
-    when "move"
-      played_by.update_attribute(:position, played_by.position + 1)
+    if game.no_rounds? || game.current_round.complete?
+      round = game.rounds.create!(first_player: player.id)
+      player.actions.create!(round: round, action: action)
+    else
+      round = game.current_round
+      round.update_attributes(second_player: player.id)
+      player.actions.create!(round: round, action: action)
+      players = [player, opponent]
 
-    when "roll"
-      roll = rand(1..6)
-      roll = (13 - played_by.position) if (played_by.position + roll) > 13
+      players.each_with_index do |player, index|
+        halt_gameplay = false
 
-      old_position = played_by.position
-      traps = played_on.active_traps
-      skipped_trap = played_by.skipped_trap(roll, old_position, traps)
+        p_action      = player.action(round).action
+        message       = ""
+        javascript    = ""
 
-      if played_on.defend?
-        new_position = played_by.base_position
-        me_javascript = "alert('#{played_on.name} defended!');" 
-      elsif skipped_trap.present?
-        skipped_trap.update_attribute(:active, false)
-        new_position = played_by.base_position
-        me_javascript = "alert('You hit a trap!');"
-        them_javascript = "window.removeTrap(#{played_on.id}, #{skipped_trap.position});"
-      else
-        new_position = (played_by.position + roll)
-      end
+        opponent      = (players - [player]).first
+        o_action      = opponent.action(round).action
+        o_javascript  = ""
 
-      played_by.update_attribute(:position, new_position)
+        case p_action 
+        when "move"
+          player.update_attribute(:position, player.position + 1)
 
-    when "base"
-      if played_by.can_move_base?
-        message = "You cannot move your base any further"
-        me_javascript = "alert('#{message}');"
-        halt_gameplay = true
-      else
-        played_by.base_positions.create!(position: played_by.position)
-        me_javascript = "window.base(#{played_by.id}, #{played_by.position});"
-      end
+        when "roll"
+          roll = rand(1..6)
+          roll = (13 - player.position) if (player.position + roll) > 13
 
-    when "trap"
-      if played_by.can_place_trap?
-        played_by.traps.create!(position: played_by.position)
-        me_javascript = "window.traps(#{played_by.id}, #{played_by.position});"
-      else
-        message = "You cannot place a trap here "
-        me_javascript = "alert('#{message}');"
-        halt_gameplay = true
-      end
+          old_position = player.position
+          traps        = opponent.active_traps
+          skipped_trap = player.skipped_trap(roll, old_position, traps)
 
-    when "reset"
-      [played_by, played_on].each do |player|
-        player.traps.each{|trap| trap.update_attribute(:active, false)}
-        player.base_positions.each(&:destroy)
-        player.actions.each(&:destroy)
-        javascript += "window.baseReset(#{player.id}, #{player.position});" +
-                      "window.trapsReset(#{player.id}, #{player.position});"
+          if o_action == "defend"
+            new_position = player.base_position
+            message += "#{opponent.name} defended!" 
+          elsif skipped_trap.present?
+            skipped_trap.update_attribute(:active, false)
+            new_position = player.base_position
+            message += "You hit a trap!"
+            o_javascript += "window.removeTrap(#{opponent.id}, #{skipped_trap.position});"
+          else
+            new_position = (player.position + roll)
+            message += "You rolled a #{roll}."
+          end
+
+          player.update_attribute(:position, new_position)
+
+        when "base"
+          if player.can_move_base?
+            player.base_positions.create!(position: player.position)
+            javascript += "window.base(#{player.id}, #{player.position});"
+          else
+            message += "You cannot place a trap there."
+          end
+
+        when "trap"
+          if player.can_place_trap?
+            player.traps.create!(position: player.position)
+            javascript += "window.traps(#{player.id}, #{player.position});"
+          else
+            message += "You cannot place a trap there."
+          end
+
+        when "reset"
+          [player, opponent].each do |p|
+            p.traps.each{|trap| trap.update_attribute(:active, false)}
+            p.base_positions.each(&:destroy)
+            javascript += "window.baseReset(#{p.id}, #{p.position});" +
+                          "window.trapsReset(#{p.id}, #{p.position});"
+          end
+
+        when "fail"
+          message += "You need to pick an option."
+        end
+
+        javascript   += "window.move(#{player.id}, #{player.position}); window.notice('#{message}');"+
+                        "window.disableButtons(#{player.id}, #{player.position}, #{player.base_position})"
+        o_javascript += "window.move(#{player.id}, #{player.position});"
+
+        if index == 1 && (player.position >= 13 || opponent.position >= 13)
+          if player.position >= 13
+            p_alert = "YOU WON!!!!"
+            o_alert = "You loose."
+            if opponent.position >= 13
+              p_alert = "It was a TIE!"
+              o_alert = "It was a TIE!"
+            end
+          elsif opponent.position >= 13
+            p_alert = "you loose."
+            o_alert = "YOU WON!!!"
+          end
+
+          halt_gameplay = true
+          game.update_attribute(:winner_id, player.user)
+          javascript   = "alert('#{p_alert}');"+
+                         "window.updateAvailability(#{player.id}, true, '#{users_path}');"
+          o_javascript = "alert('#{o_alert}');"+
+                         "window.updateAvailability(#{opponent.id}, true, '#{users_path}');"
+        end
+
+        PrivatePub.publish_to(action_player_path(player.id), javascript)
+        PrivatePub.publish_to(action_player_path(opponent.id), o_javascript)    
+        PrivatePub.publish_to(action_game_path(game.id), "window.restartRound();") unless halt_gameplay
       end
     end
 
-    if played_by.position >= 13
-      played_on.user.update_availability(true)
-      played_by.user.update_availability(true)
-      game.update_attribute(:winner_id, played_by.user)
-      alert = "alert('#{played_by.user.name.upcase} WINS!');"+
-              "window.location.replace('#{users_path}');"
-    end
-
-    PrivatePub.publish_to(action_player_path(played_by.id), me_javascript)
-
-    PrivatePub.publish_to(action_player_path(played_on.id), them_javascript)    
-
-    unless halt_gameplay
-      PrivatePub.publish_to(action_game_path(game.id),
-        javascript +
-        "window.move(#{played_by.id}, #{played_by.position});"+
-        "window.turnTo(#{played_on.id});"+
-        alert
-      )
-
-      played_by.actions.create!(action: action)
-      game.update_attribute(:turn, played_on)
-    end
   end
 
   def opponent_decision

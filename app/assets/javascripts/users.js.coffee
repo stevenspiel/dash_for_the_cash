@@ -18,7 +18,12 @@ PrivatePub.subscribe "/users/new", (data, channel) ->
 
 PrivatePub.subscribe "/users/availability", (data, channel) ->
   userId = data.user.id
-  window.removeUser(userId)
+  availability = data.user.availabile
+  userName = data.user.name
+  if availability == true
+    window.addUser(userId, userName)
+  else if availability == false
+    window.removeUser(userId)
 
 window.addUser = (userId, userName) ->
   $("#opponents").append("<li id=#{userId}><a href='/games/new?opponent_id=#{userId}'>#{userName}</a></li>")
@@ -35,3 +40,12 @@ window.removeUser = (userId) ->
 window.nameListed = (userId, elements) ->
   if userId not in elements
     window.location.replace('/')
+
+window.updateAvailability = (userId, availability, path) ->
+  $.ajax "/users/#{userId}/update_availability",
+    type: 'POST'
+    dataType: 'html'
+    data: { availability: availability }
+    success: ->
+      window.location.replace path
+

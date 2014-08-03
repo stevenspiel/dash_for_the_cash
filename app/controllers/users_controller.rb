@@ -19,7 +19,14 @@ class UsersController < ApplicationController
     end
     session[:user_id] = @user.id
 
-    PrivatePub.publish_to("/users/new", user: @user)
+    # PrivatePub.publish_to("/users/new", user: @user)
     redirect_to :users
+  end
+
+  def update_availability
+    availability = params[:availability]
+    id = params[:id]
+    user = Player.find(id).user
+    user.update_availability(availability)
   end
 end

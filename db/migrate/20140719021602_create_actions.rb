@@ -3,6 +3,7 @@ class CreateActions < ActiveRecord::Migration
     create_table :actions do |t|
       t.string  :action
       t.integer :player_id
+      t.integer :round_id
       
       t.timestamps
     end

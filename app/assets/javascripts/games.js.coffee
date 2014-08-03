@@ -1,9 +1,9 @@
-window.turnTo = (playerId) ->
-  yourId = $(".you-field").attr('id').split('_')[0]
-  if parseInt(playerId) == parseInt(yourId)
-    $("input[type='submit']").prop('disabled',false)
-  else
-    $("input[type='submit']").prop('disabled',true)
+window.playerReady = ->
+  $('.ready-button').hide()
+  $('#waiting').show()
+
+window.notice = (message) ->
+  $('#notice').text(message)
 
 window.move = (playerId, position) ->
   player = $("[id^='#{playerId}']").attr('class').split('-')[0]
@@ -30,3 +30,54 @@ window.removeTrap = (playerId, trapPosition) ->
 window.trapsReset = (playerId, basePosition) ->
   for position in [1..12]
     $("##{playerId}_#{position}").removeClass("trap")
+
+window.disableButtons = (playerId, position, basePosition) ->
+  
+
+window.restartRound = ->
+  $('button').addClass("disabled")
+  $('#timer-display').text()
+  window.beginRound()
+
+window.beginRound = ->
+  # READY GO! text
+  $('button').removeClass("disabled")
+  # disable non-available buttons
+  window.resetRound()
+  window.countdownAndSubmit()
+
+window.resetRound = ->
+  $('#instructions-overlay').hide()
+  $('button').removeClass('selected')
+
+window.countdownAndSubmit = ->
+  time = 7
+  $timer = $('#timer-display')
+  $timer.show().text(time)
+
+  window.gamePlayTime = setInterval ->
+    time -= 1
+    if time >= 0
+      $timer.text(time)
+      if time == 0
+        window.submitMoves()
+  , 1000
+
+window.submitMoves = ->
+  gameId = $("button:first").data('game-id')
+  playerId = $("button:first").data('played-by')
+  opponentId = $("button:first").data('played-on')
+
+  if $("button.selected").length != 1
+    move = "fail"
+  else
+    move = $("button.selected").attr('id')
+
+  $.ajax "/games/#{gameId}/play",
+    type: 'POST'
+    dataType: 'html'
+    data: { playerId: playerId, opponentId: opponentId, move: move }
+    success: ->
+      # nothing
+    error: ->
+      # put up an error message

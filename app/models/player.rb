@@ -2,18 +2,11 @@ class Player < ActiveRecord::Base
   belongs_to :user
   belongs_to :game
 
-  has_one :game, foreign_key: 'turn_id'
-
   has_many :actions,        dependent:  :destroy
   has_many :traps,          dependent:  :destroy
   has_many :base_positions, dependent:  :destroy
 
   delegate :name, to: :user
-
-  def defend?
-    return false if actions.none?
-    actions.last.action == "defend"
-  end
 
   def skipped_trap(roll, old_position, traps = [])
     new_position = old_position + roll
@@ -27,7 +20,7 @@ class Player < ActiveRecord::Base
   end
 
   def can_move_base?
-    base_position == position
+    base_position != position
   end
 
   def can_place_trap?
@@ -40,5 +33,9 @@ class Player < ActiveRecord::Base
 
   def active_traps
     traps.select{ |trap| trap.active? }
+  end
+
+  def action(round)
+    actions.where(round: round).first
   end
 end
