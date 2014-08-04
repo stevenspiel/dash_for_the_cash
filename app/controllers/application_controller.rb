@@ -11,7 +11,9 @@ class ApplicationController < ActionController::Base
     @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
   end
 
-  private def require_login
+private 
+  
+  def require_login
     unless valid_session_id && current_user
       redirect_to login_path
     end
