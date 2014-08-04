@@ -177,3 +177,7 @@ button:focus {
   right: 20px;
   top: 14px;
 }
+
+@media only screen and (max-device-width : 500px) {
+  
+}
