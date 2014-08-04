@@ -32,17 +32,15 @@ window.trapsReset = (playerId, basePosition) ->
     $("##{playerId}_#{position}").removeClass("trap")
 
 window.disableButtons = (playerId, position, basePosition) ->
-  
+
 
 window.restartRound = ->
-  $('button').addClass("disabled")
   $('#timer-display').text()
   window.beginRound()
 
 window.beginRound = ->
   # READY GO! text
   $('button').removeClass("disabled")
-  # disable non-available buttons
   window.resetRound()
   window.countdownAndSubmit()
 
@@ -80,4 +78,3 @@ window.submitMoves = ->
     success: ->
       # nothing
     error: ->
-      # put up an error message

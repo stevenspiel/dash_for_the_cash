@@ -2,9 +2,10 @@ class Player < ActiveRecord::Base
   belongs_to :user
   belongs_to :game
 
-  has_many :actions,        dependent:  :destroy
-  has_many :traps,          dependent:  :destroy
-  has_many :base_positions, dependent:  :destroy
+  has_many :actions,        dependent: :destroy
+  has_many :traps,          dependent: :destroy
+  has_many :rounds,         dependent: :destroy
+  has_many :base_positions, dependent: :destroy
 
   delegate :name, to: :user
 

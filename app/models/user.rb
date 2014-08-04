@@ -4,7 +4,19 @@ class User < ActiveRecord::Base
   has_many :games, foreign_key: 'opponent_id'
   has_many :games, foreign_key: 'winner_id'
 
-  scope :available, -> { where("available = ? AND updated_at >= ?", true, Time.now - 1.hour) }
+  scope :available, -> { where("available = ? AND updated_at >= ?", true, Time.now - 10.minutes) }
+
+  def self.from_omniauth(auth)
+    where(auth.slice(:provider, :uid)).first_or_initialize.tap do |user|
+      user.provider = auth.provider
+      user.uid = auth.uid
+      user.name = auth.info.name
+      user.oauth_token = auth.credentials.token
+      user.oauth_expires_at = Time.at(auth.credentials.expires_at)
+      user.update_availability(true)
+      user.save!
+    end
+  end
 
   def self.delete
     User.all.each(&:destroy)
@@ -15,10 +27,12 @@ class User < ActiveRecord::Base
   end
 
   def update_availability(availability)
-    update_attribute(:available, availability)
-    PrivatePub.publish_to("/users/availability", 
-      user: self
-    )
+    if available != availability
+      update_attribute(:available, availability)
+      PrivatePub.publish_to("/users/available_members", 
+        user: self
+      )
+    end
   end
 
   def self.delete_everything!

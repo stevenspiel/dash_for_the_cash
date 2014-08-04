@@ -7,14 +7,13 @@ gem 'sass-rails', '~> 4.0.0'
 gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.0.0'
 gem 'jquery-rails'
-gem 'turbolinks'
 gem 'jbuilder', '~> 1.2'
 gem 'private_pub'
 gem 'faye'
 gem 'thin'
 gem 'foreman'
 gem 'heroku'
-gem 'google-api-omniauth'
+gem "omniauth-google-oauth2"
 
 group :development do
   gem 'capistrano-ext'
@@ -28,4 +27,5 @@ end
 group :development, :test do
   gem 'pry'
   gem 'pry-nav'
+  gem 'dotenv-rails'
 end

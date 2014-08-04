@@ -16,7 +16,7 @@ class Game < ActiveRecord::Base
   end
 
   def current_round
-    rounds.try(:last)
+    rounds.last
   end
 
   def players_ready?
@@ -31,4 +31,8 @@ class Game < ActiveRecord::Base
     rounds.size == 0
   end
 
+  def new_round?
+    rounds.size == 0 ||
+    current_round.complete?
+  end
 end

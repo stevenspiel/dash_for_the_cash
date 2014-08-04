@@ -53,8 +53,8 @@ ActiveRecord::Schema.define(version: 20140731015452) do
 
   create_table "rounds", force: true do |t|
     t.integer  "game_id"
-    t.integer  "first_player"
-    t.integer  "second_player"
+    t.integer  "first_player_id"
+    t.integer  "second_player_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -68,8 +68,12 @@ ActiveRecord::Schema.define(version: 20140731015452) do
   end
 
   create_table "users", force: true do |t|
-    t.text     "name"
-    t.boolean  "available",  default: true
+    t.string   "name"
+    t.string   "provider"
+    t.string   "uid"
+    t.string   "oauth_token"
+    t.datetime "oauth_expires_at"
+    t.boolean  "available",        default: true
     t.datetime "created_at"
     t.datetime "updated_at"
   end

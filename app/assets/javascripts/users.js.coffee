@@ -11,14 +11,9 @@ PrivatePub.subscribe "/games/new", (data, channel) ->
       success: (data, textStatus, jqXHR) ->
         window.location.replace data
 
-PrivatePub.subscribe "/users/new", (data, channel) ->
-  userName = data.user.name
+PrivatePub.subscribe "/users/available_members", (data, channel) ->
   userId = data.user.id
-  window.addUser(userId, userName)
-
-PrivatePub.subscribe "/users/availability", (data, channel) ->
-  userId = data.user.id
-  availability = data.user.availabile
+  availability = data.user.available
   userName = data.user.name
   if availability == true
     window.addUser(userId, userName)
@@ -36,10 +31,6 @@ window.removeUser = (userId) ->
   if $('li').length == 0
     $("#users-present").hide()
     $("#users-absent").show()
-
-window.nameListed = (userId, elements) ->
-  if userId not in elements
-    window.location.replace('/')
 
 window.updateAvailability = (userId, availability, path) ->
   $.ajax "/users/#{userId}/update_availability",

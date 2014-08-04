@@ -58,12 +58,14 @@ class GamesController < ApplicationController
     player        = Player.find(params[:playerId])
     opponent      = Player.find(params[:opponentId])
 
-    if game.no_rounds? || game.current_round.complete?
-      round = game.rounds.create!(first_player: player.id)
+    if game.new_round?
+      round = game.rounds.create!(first_player: player)
       player.actions.create!(round: round, action: action)
     else
       round = game.current_round
-      round.update_attributes(second_player: player.id)
+      # game/play is getting called twice sometimes. PorqUe wHy?
+      return if round.first_player == player
+      round.update_attributes(second_player: player)
       player.actions.create!(round: round, action: action)
       players = [player, opponent]
 
@@ -137,33 +139,37 @@ class GamesController < ApplicationController
                         "window.disableButtons(#{player.id}, #{player.position}, #{player.base_position})"
         o_javascript += "window.move(#{player.id}, #{player.position});"
 
-        if index == 1 && (player.position >= 13 || opponent.position >= 13)
-          if player.position >= 13
-            p_alert = "YOU WON!!!!"
-            o_alert = "You loose."
-            if opponent.position >= 13
-              p_alert = "It was a TIE!"
-              o_alert = "It was a TIE!"
-            end
-          elsif opponent.position >= 13
-            p_alert = "you loose."
-            o_alert = "YOU WON!!!"
-          end
-
-          halt_gameplay = true
-          game.update_attribute(:winner_id, player.user)
-          javascript   = "alert('#{p_alert}');"+
-                         "window.updateAvailability(#{player.id}, true, '#{users_path}');"
-          o_javascript = "alert('#{o_alert}');"+
-                         "window.updateAvailability(#{opponent.id}, true, '#{users_path}');"
-        end
-
         PrivatePub.publish_to(action_player_path(player.id), javascript)
-        PrivatePub.publish_to(action_player_path(opponent.id), o_javascript)    
-        PrivatePub.publish_to(action_game_path(game.id), "window.restartRound();") unless halt_gameplay
+        PrivatePub.publish_to(action_player_path(opponent.id), o_javascript)
+
+        if index == 1
+          if player.position < 13 && opponent.position < 13
+            PrivatePub.publish_to(action_game_path(game.id), "window.restartRound();")
+          else
+            if player.position >= 13
+              p_alert = "YOU WON!!!!"
+              o_alert = "You loose."
+              if opponent.position >= 13
+                p_alert = "It was a TIE!"
+                o_alert = "It was a TIE!"
+              end
+            elsif opponent.position >= 13
+              p_alert = "you loose."
+              o_alert = "YOU WON!!!"
+            end
+
+            halt_gameplay = true
+            game.update_attribute(:winner_id, player.user)
+
+            javascript   = "alert('#{p_alert}'); window.location.replace('#{ root_path }');"
+            o_javascript = "alert('#{o_alert}'); window.location.replace('#{ root_path }');"
+
+            PrivatePub.publish_to(action_player_path(player.id), javascript)
+            PrivatePub.publish_to(action_player_path(opponent.id), o_javascript)
+          end
+        end
       end
     end
-
   end
 
   def opponent_decision
