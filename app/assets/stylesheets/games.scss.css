@@ -3,7 +3,7 @@ button {
 }
 
 #gameplay {
-	padding-top: 75px;
+	padding-top: 85px;
 	width: 100%;
 }
 
@@ -39,40 +39,41 @@ button {
 	background: #BDD8F0;
 }
 
-.them-position:before {
-	color: #FF0000;
-}
-
-.you-position:before {
-	color: #203864;
-}
-
 [id$='name-container'] {
-	position: absolute;
-	padding: 15px 15px;
+  position: absolute;
+  padding: 15px 15px;
 }
 
 #them-name-container {
-	right: 0;
-	bottom: 0;
-	background: #BDD8F0;
-	border-top: 1px solid #ccc;
+  right: 0;
+  bottom: 0;
+  background: #BDD8F0;
+  border-top: 1px solid #ccc;
   border-left: 1px solid #ccc;
 }
 
 #you-name-container {
-	left: 0;
-	top: 0;
-	background: #ffbebe;
-	border-bottom: 1px solid #ccc;
+  left: 0;
+  top: 0;
+  background: #ffbebe;
+  border-bottom: 1px solid #ccc;
   border-right: 1px solid #ccc;
 }
 
-[class$='position']:before {
-	content: '⬤';
-	font-size: 0.75em;
-	text-align: center;
-	margin-left: 18px;
+.them-position {
+  background: url(/assets/red.png);
+}
+
+.you-position {
+  background: url(/assets/blue.png);
+}
+
+[class$='position'] {
+  background-size: 13px;
+  background-repeat: no-repeat;
+  text-align: center;
+  margin-left: 18px;
+  background-position: 19px 8px;
 }
 
 .left {
@@ -87,7 +88,7 @@ button {
 
 #timer-display {
   font-size: 1.5em;
-  padding: 40px;
+  padding: 10px 40px;
 }
 
 #action-portion {
@@ -159,6 +160,11 @@ button:focus {
   top: 10%;
   color: #fff;
   text-align: center;
+  font-size: 1.2em;
+}
+
+#instructions p {
+  padding: 20px 10px;
 }
 
 .ready-button {
@@ -171,13 +177,29 @@ button:focus {
 }
 
 #notice {
-  color: #ff0000;
-  width: 185px;
-  position: absolute;
-  right: 20px;
-  top: 14px;
+  color:#FF0000;
+  left:0;
+  position:absolute;
+  text-align:center;
+  top:60px;
+  width:318px;
+}
+
+#buttons-descriptions {
+  width: 100%;
+  padding: 20px;
+}
+
+.button-description {
+  margin: 10px;
+  border-radius: 5px;
+  padding: 10px;
+  border: 1px solid #fff;
+  text-align: left;
+  color: #000;
+  background: #fff;
 }
 
 @media only screen and (max-device-width : 500px) {
-  
+
 }

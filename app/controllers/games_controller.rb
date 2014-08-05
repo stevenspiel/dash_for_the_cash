@@ -132,7 +132,7 @@ class GamesController < ApplicationController
           end
 
         when "fail"
-          message += "You need to pick an option."
+          message += "Choose an option before the time runs out!"
         end
 
         javascript   += "window.move(#{player.id}, #{player.position}); window.notice('#{message}');"+

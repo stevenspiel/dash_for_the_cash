@@ -1,9 +1,10 @@
 <div id="instructions-overlay">
   <div id="instructions">
     <p>The goal is to make it to your opponent's side before they get to yours</p>
-    <p>You have these options...blah blah blah</p>
+    <p>You'll have 7 seconds to choose an option. Pick quickly!</p>
+    <p>You'll figure it out. Good luck!</p>
     <!-- countdown from 10 -->
-    <%= button_to "Ready!", ready_game_path(game, data: { player_id: them.id, game_id: game.id  }), 
+    <%= button_to "Ready?", ready_game_path(game, data: { player_id: them.id, game_id: game.id  }), 
                   method: "POST", remote: true, class: 'ready-button' %>
   </div>
   <div id="waiting">
