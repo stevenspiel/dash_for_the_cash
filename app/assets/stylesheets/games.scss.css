@@ -60,20 +60,22 @@ button {
   border-right: 1px solid #ccc;
 }
 
+[class$='position']:before {
+  content: '\2022';
+  font-size: 2.25em;
+  text-align: center;
+  margin-left: 0;
+  margin-top: 4px;
+  line-height: 0;
+  display: block;
+}
+
 .them-position {
-  background-image: asset-data-url('red.png');
+  color: #FF0000;
 }
 
 .you-position {
-  background-image: asset-data-url('blue.png');
-}
-
-[class$='position'] {
-  background-size: 13px;
-  background-repeat: no-repeat;
-  text-align: center;
-  margin-left: 18px;
-  background-position: 19px 8px;
+  color: #203864;
 }
 
 .left {
