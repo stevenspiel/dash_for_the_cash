@@ -61,7 +61,7 @@ button {
 }
 
 [class$='position']:before {
-  content: '\2B24';
+  content: '⬤';
   font-size: 0.75em;
   text-align: center;
   margin-left: 18px;
