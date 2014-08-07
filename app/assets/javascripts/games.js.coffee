@@ -58,6 +58,7 @@ window.countdownAndSubmit = ->
     if time >= 0
       $timer.text(time)
       if time == 0
+        $timer.text("")
         window.submitMoves()
   , 1000
 
