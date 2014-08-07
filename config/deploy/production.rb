@@ -18,7 +18,6 @@ role :db,  %w{deploy@example.com}
 # server 'example.com', user: 'deploy', roles: %w{web app}, my_property: :my_value
 server "dashforthecash.stevenspiel.com", :app, :web, :db, :primary => true
 set :deploy_to, "/var/www/fancy_shoes"
-config.assets.compile = true
 
 # Custom SSH Options
 # ==================

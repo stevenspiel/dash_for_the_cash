@@ -61,13 +61,10 @@ button {
 }
 
 [class$='position']:before {
-  content: '⬤';
+  content: '\2B24';
   font-size: 0.75em;
   text-align: center;
   margin-left: 18px;
-/*  margin-top: 4px;
-  line-height: 0;
-  display: block;*/
 }
 
 .them-position {

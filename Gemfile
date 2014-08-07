@@ -19,11 +19,6 @@ gem "omniauth-google-oauth2"
 group :development do
   gem 'capistrano-ext'
   gem 'capistrano'
-  gem 'rails_12factor'
-end
-
-group :production do
-  gem 'rails_12factor'
 end
 
 group :development, :test do
