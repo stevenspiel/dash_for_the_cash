@@ -61,11 +61,11 @@ button {
 }
 
 .them-position {
-  background: url(/assets/red.png);
+  background-image:url('<%= asset_path("red.png") %> ');
 }
 
 .you-position {
-  background: url(/assets/blue.png);
+  background-image:url('<%= asset_path("blue.png") %> ');
 }
 
 [class$='position'] {
