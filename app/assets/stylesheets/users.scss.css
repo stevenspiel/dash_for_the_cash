@@ -7,3 +7,74 @@ ul#opponents {
   font-size: .8em;
   color: #888;
 }
+
+.hidden {
+  display: none !important;
+}
+
+#funds {
+  text-align: center;
+  margin-top: 110px;
+  height: 100px;
+  font-size: 1.3em;
+}
+
+#select-player {
+  margin: auto;
+  text-align: center;
+  height: 130px;
+}
+
+#home-message {
+  color: red;
+  text-align: center;
+  padding-top: 5px;
+}
+
+#become-available {
+  margin-top: 20px;
+}
+
+#finding-player-overlay {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #fff; 
+  z-index: 1;
+}
+
+#finding-player-overlay div {
+  text-align: center;
+  padding-top: 35%;
+  font-weight: bold;
+}
+
+.spinning-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  margin:-100px 0 0 -100px;
+}
+
+#inner-ring {
+  -webkit-animation:spin 6s linear infinite;
+  -moz-animation:spin 6s linear infinite;
+  animation:spin 6s linear infinite;
+}
+@-moz-keyframes spin { 100% { -moz-transform: rotate(-360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(-360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }
+
+#outer-ring {
+  -webkit-animation:negative-spin 6s linear infinite;
+  -moz-animation:negative-spin 6s linear infinite;
+  animation:negative-spin 6s linear infinite;
+}
+@-moz-keyframes negative-spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes negative-spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes negative-spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }

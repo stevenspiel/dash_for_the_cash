@@ -1,21 +1,40 @@
-<%= link_to "Sign out", signout_path, id: "sign_out" %>
-
-<div id="users-present" style="display:<%= @users.any? ? 'block' : 'none' %>">
-  Select an opponent.
+<div id="sign-out">
+  Hi, <%= @current_user.first_name %>
+  <%= link_to "Sign out", signout_path %>
 </div>
 
-<div id="users-absent" style="display:<%= @users.any? ? 'none' : 'block' %>">
-  Looks like no one else is online.
+<div id="funds">
+  You have: <b><%= money_to_s(@current_user.money) %></b>
 </div>
 
-<ul id="opponents">
-  <% @users.each do |user| %>
-    <%= render @users, played_user_on: @current_user.date_played(user) %>
+<div id="select-player">
+  <%= form_tag({action: :find_opponent}, id: "find-opponent") do %>
+    <%= label_tag :tier, "Play for" %>
+    <% if @current_user.tier_options.size == 1 %>
+      <%= money_to_s(@current_user.tier_options.first) %>
+      <%= hidden_field_tag :tier, @current_user.tier_options.first %>
+    <% else %>
+      <%= select_tag :tier, options_for_select(
+            @current_user.tier_options.map{|i| [money_to_s(i), i] }, 
+            @current_user.tier_preference) %>
+    <% end %>
+    <%= hidden_field_tag :user_id, @current_user.id %>
+    <%= submit_tag "", class: "hidden" %>
   <% end %>
-</ul>
 
-<%= hidden_field_tag "current_user", @current_user.id %>
+  <%= form_tag({action: :become_searchable}, remote: true) do %>
+    <%= hidden_field_tag :user_id, @current_user.id %>
+    <%= hidden_field_tag :selected_tier, @current_user.tier_preference %>
+    <%= submit_tag "Find Opponent", id: 'become-available' %>
+  <% end %>
+</div>
 
-<%= subscribe_to new_user_path %>
-<%= subscribe_to new_game_path %>
-<%= subscribe_to available_members_users_path %>
+<div id="home-message">
+  <%= @message %>
+</div>
+
+<div id="finding-player-overlay">
+  <div>Finding Opponent...</div>
+  <%= image_tag "inner-ring.png", class: 'spinning-ring', id: 'inner-ring' %>
+  <%= image_tag "outer-ring.png", class: 'spinning-ring', id: 'outer-ring' %>
+</div>

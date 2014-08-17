@@ -1,10 +1,10 @@
 class User < ActiveRecord::Base
   has_many :players
-  has_many :games, foreign_key: 'initiator_id' 
-  has_many :games, foreign_key: 'opponent_id'
-  has_many :games, foreign_key: 'winner_id'
+  has_many :initiated_games, foreign_key: 'initiator_id', class_name: 'Game'
+  has_many :opponent_games,  foreign_key: 'opponent_id',  class_name: 'Game'
+  has_many :won_games,       foreign_key: 'winner_id',    class_name: 'Game'
 
-  scope :available, -> { where("available = ? AND updated_at >= ?", true, Time.now - 10.minutes) }
+  before_save :update_tier_preference
 
   def self.from_omniauth(auth)
     where(auth.slice(:provider, :uid)).first_or_initialize.tap do |user|
@@ -13,7 +13,6 @@ class User < ActiveRecord::Base
       user.name = auth.info.name
       user.oauth_token = auth.credentials.token
       user.oauth_expires_at = Time.at(auth.credentials.expires_at)
-      user.update_availability(true)
       user.save!
     end
   end
@@ -22,17 +21,29 @@ class User < ActiveRecord::Base
     User.all.each(&:destroy)
   end
 
+  def first_name
+    name.split(" ").first
+  end
+
+  def games
+    opponent_games.merge(initiated_games)
+  end
+
   def self.valid_session_id?(session)
     session[:user_id] && User.find_by(id: session[:user_id]).present?
   end
 
-  def update_availability(availability)
-    if available != availability
-      update_attribute(:available, availability)
-      PrivatePub.publish_to("/users/available_members", 
-        user: self
-      )
-    end
+  def snatch_opponent(tier)
+    available_users = User.where(available: true, tier_preference: tier).where.not(id: id)
+    opponent = available_users.shuffle.try(:first)
+    return nil unless opponent
+    opponent.update_attribute(:available, false)
+    update_attribute(:available, false)
+    opponent
+  end
+
+  def waiting_game
+    opponent_games.where(opponent_ready: false).try(:first)
   end
 
   def self.delete_everything!
@@ -48,5 +59,51 @@ class User < ActiveRecord::Base
   def games_with(user)
     games.where(initiator: user) + games.where(opponent: user)
   end
-  
+
+  def transfer_money(loser, wager)
+    give_money_to_winner(wager)
+    take_money_from_loser(loser, wager)
+  end
+
+  def tier_options
+    self.class.tier_options(money)
+  end
+
+  def self.tier_options(money)
+    options = []
+    i = 1
+
+    while i <= money
+      options << i
+      i *= 2
+    end
+
+    options
+  end
+
+private
+
+  def update_tier_preference
+    if money_changed?
+      if money_was > money || (money_was < money && had_highest_tier?)
+        self.tier_preference = tier_options.last
+      end
+    end
+  end
+
+  def had_highest_tier?
+    money_was >= self.class.tier_options(money_was).last
+  end
+
+  def give_money_to_winner(wager)
+    new_amount = money + wager
+    update_attribute(:money, new_amount)
+  end
+
+  def take_money_from_loser(loser, wager)
+    new_amount = loser.money - wager
+    new_amount = 1 if new_amount <= 0
+    loser.update_attribute(:money, new_amount)
+  end
+
 end

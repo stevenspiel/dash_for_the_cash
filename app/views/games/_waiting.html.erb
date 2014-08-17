@@ -2,4 +2,4 @@
   <%= image_tag 'loading.gif', class: 'loading-gif' %>
   <span class="waiting-message">Waiting for opponent...</span>
 </div>
-<%= subscribe_to "/games/opponent_decision/#{@game.id}" %>
+<%= subscribe_to "/games/opponent_ready/#{@game.id}" %>

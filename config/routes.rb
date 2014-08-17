@@ -11,10 +11,9 @@ Dash::Application.routes.draw do
   resources :sessions, only: [:create, :destroy]
 
   resources :users do
-    member do
-      post :update_availability
-    end
     collection do
+      post :become_searchable
+      post :find_opponent
       post :available_members
     end
   end
@@ -24,7 +23,7 @@ Dash::Application.routes.draw do
       post :play
       post :ready
       post :action
-      post :opponent_decision
+      post :opponent_ready
       delete :play
     end
   end

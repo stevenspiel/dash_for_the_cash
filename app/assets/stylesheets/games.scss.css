@@ -39,6 +39,14 @@ button {
 	background: #BDD8F0;
 }
 
+#wager {
+  position: absolute;
+  right: 13px;
+  top: 10px;
+  font-weight: bold;
+  font-size: 1.4em;
+}
+
 [id$='name-container'] {
   position: absolute;
   padding: 15px 15px;
@@ -87,6 +95,7 @@ button {
 
 #timer-display {
   font-size: 1.5em;
+  height: 1.5em;
   padding: 10px 40px;
 }
 
@@ -113,9 +122,9 @@ button {
   border: 2px solid white;
 }
 
-.action-button .disabled {
-  opacity: 50%;
-  cursor: pointer;
+.disabled {
+  opacity: .5;
+  cursor: default;
 }
 
 button.selected {
@@ -156,7 +165,7 @@ button:focus {
   right: 0;
   left: 0;
   bottom: 0;
-  top: 10%;
+  top: 50px;
   color: #fff;
   text-align: center;
   font-size: 1.2em;

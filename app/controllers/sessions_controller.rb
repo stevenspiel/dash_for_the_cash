@@ -9,7 +9,6 @@ class SessionsController < ApplicationController
 
   def destroy
     user = User.find(session[:user_id])
-    user.update_availability(false)
     session[:user_id] = nil
     redirect_to root_path
   end

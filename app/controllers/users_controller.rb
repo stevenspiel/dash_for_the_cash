@@ -3,30 +3,48 @@ class UsersController < ApplicationController
   before_filter :redirect_if_logged_in, :only => :login
 
   def index
-    @current_user = User.find_by(id: session[:user_id])
-    @current_user.update_availability(true)
-    @available_users = User.available
-    @users = @available_users - [@current_user]
+    @user = current_user
+    @message = flash[:message]
   end
 
   def create
     @user = User.create!(name: params[:user][:name])
-
-    if session[:user_id] && User.find_by(id: session[:user_id])
-      User.find(session[:user_id]).update_availability(true)
-    end
-
     redirect_to :users
   end
 
-  def update_availability
-    availability = params[:available]
-    id = params[:id]
-    user = Player.find(id).user
-    user.update_availability(availability)
+  def find_opponent
+    @user = User.find(params[:user_id])
+    @user.update_attribute(:available, false)
+    tier = @user.tier_preference
+    
+    if @game = @user.waiting_game
+      go_to(@game)
+    elsif @opponent = @user.snatch_opponent(tier)
+      @game = Game.create!(initiator: @user, opponent: @opponent, wager: tier)
+      @game.players.create!(user: @user)
+      @game.players.create!(user: @opponent)
+      redirect_to @game
+    else
+      flash[:message] = "No other users are currently available. Try changing your wager or try again later."
+      redirect_to :users
+    end
   end
 
-  private def redirect_if_logged_in
+  def become_searchable
+    user = User.find(params[:user_id])
+    tier = params[:selected_tier]
+    user.update_attributes(available: true, tier_preference: tier)
+  end
+
+private 
+
+  def go_to(game)
+    game.update_attribute(:opponent_ready, true)
+    PrivatePub.publish_to(ready_game_path(game), "window.location.reload();")
+    redirect_to game
+  end
+  
+  def redirect_if_logged_in
     if current_user
       redirect_to root_path
     end

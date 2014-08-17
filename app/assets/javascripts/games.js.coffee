@@ -31,34 +31,42 @@ window.trapsReset = (playerId, basePosition) ->
   for position in [1..12]
     $("##{playerId}_#{position}").removeClass("trap")
 
-window.disableButtons = (playerId, position, basePosition) ->
+window.bindButtons = ->
+  $("button").click (e) ->
+    $target = $(e.target);
+    if !$target.hasClass('disabled')
+      $('button').removeClass("selected");
+      $target.addClass("selected");
 
-
-window.restartRound = ->
-  $('#timer-display').text()
-  window.beginRound()
+window.disableButtons = (position, basePosition) ->
+  $('button').removeClass("disabled")
+  if position == basePosition
+    $('#base').addClass("disabled")
+  if position == 0
+    $('#trap').addClass("disabled")
 
 window.beginRound = ->
   # READY GO! text
-  $('button').removeClass("disabled")
-  window.resetRound()
+  $('#instructions-overlay').hide()
   window.countdownAndSubmit()
 
-window.resetRound = ->
-  $('#instructions-overlay').hide()
-  $('button').removeClass('selected')
+window.restartRound = ->
+  clearInterval(window.gamePlayTime)
+  window.countdownAndSubmit()
 
 window.countdownAndSubmit = ->
+  $('button').removeClass('selected')
   time = 7
   $timer = $('#timer-display')
-  $timer.show().text(time)
+  $timer.text(time)
 
   window.gamePlayTime = setInterval ->
     time -= 1
+
     if time >= 0
       $timer.text(time)
       if time == 0
-        $timer.text("")
+        $timer.text('')
         window.submitMoves()
   , 1000
 

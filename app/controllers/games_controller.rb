@@ -1,13 +1,12 @@
 class GamesController < ApplicationController
 
   def new
-    initiator = User.find(session[:user_id])
+    initiator = User.find(params[:user_id])
     opponent = User.find(params[:opponent_id])
     
-    @game = Game.create!(initiator: initiator, opponent: opponent)
-    @you = @game.players.create!(user: initiator)
-    @them = @game.players.create!(user: opponent)
-    initiator.update_availability(false)    
+    @game = Game.create!(initiator: initiator, opponent: opponent, wager: initiator.money)
+    @player = @game.players.create!(user: initiator)
+    @opponent = @game.players.create!(user: opponent)
 
     PrivatePub.publish_to("/games/new", 
       game: @game, 
@@ -17,24 +16,23 @@ class GamesController < ApplicationController
       opponent_id: opponent.id
     )
 
-    redirect_to @game
+    render :show
   end
 
   def show
-    unless Game.find_by(id: params[:id]) && User.valid_session_id?(session)
-      redirect_to :root
+    @game = Game.find_by(id: params[:id])
+
+    if @game && @game.has_user?(current_user) && @game.active? && @game.has_two_players?
+      @player   = @game.player(current_user)
+      @opponent = @game.opponent(current_user)
+      @actions  = Game::ACTIONS
+      unless Rails.env.production?
+        @actions[:reset] = "Reset"
+        @actions[:win] = "Win"
+      end
     else
-      @game = Game.find params[:id]
-      @you  = @game.you(current_user)
-      @them = @game.them(current_user)
-      @actions = {
-        move:   'Move 1 Space',
-        roll:   'Roll Die',
-        defend: 'Defend',
-        base:   'Move Base',
-        trap:   'Place Trap',
-      }
-      @actions[:reset] = "Reset" unless Rails.env.production?
+      binding.pry
+      redirect_to :root
     end
   end
 
@@ -123,6 +121,9 @@ class GamesController < ApplicationController
             message += "You cannot place a trap there."
           end
 
+        when "fail"
+          message += "Choose an option before the time runs out!"
+
         when "reset"
           [player, opponent].each do |p|
             p.traps.each{|trap| trap.update_attribute(:active, false)}
@@ -130,13 +131,12 @@ class GamesController < ApplicationController
             javascript += "window.baseReset(#{p.id}, #{p.position});" +
                           "window.trapsReset(#{p.id}, #{p.position});"
           end
-
-        when "fail"
-          message += "Choose an option before the time runs out!"
+        when "win"
+          player.update_attribute(:position, 13)
         end
 
         javascript   += "window.move(#{player.id}, #{player.position}); window.notice('#{message}');"+
-                        "window.disableButtons(#{player.id}, #{player.position}, #{player.base_position})"
+                        "window.disableButtons(#{player.position}, #{player.base_position})"
         o_javascript += "window.move(#{player.id}, #{player.position});"
 
         PrivatePub.publish_to(action_player_path(player.id), javascript)
@@ -147,19 +147,20 @@ class GamesController < ApplicationController
             PrivatePub.publish_to(action_game_path(game.id), "window.restartRound();")
           else
             if player.position >= 13
-              p_alert = "YOU WON!!!!"
-              o_alert = "You loose."
+              p_alert = "You won #{game.wager_to_s}!!!!".upcase
+              o_alert = "You lost #{game.wager_to_s}."
+              game.set_winner(winner: player, loser: opponent)
               if opponent.position >= 13
                 p_alert = "It was a TIE!"
                 o_alert = "It was a TIE!"
               end
             elsif opponent.position >= 13
-              p_alert = "you loose."
-              o_alert = "YOU WON!!!"
+              p_alert = "You lost #{game.wager_to_s}."
+              o_alert = "You won #{game.wager_to_s}!!!".upcase
+              game.set_winner(winner: opponent, loser: player)
             end
 
             halt_gameplay = true
-            game.update_attribute(:winner_id, player.user)
 
             javascript   = "alert('#{p_alert}'); window.location.replace('#{ root_path }');"
             o_javascript = "alert('#{o_alert}'); window.location.replace('#{ root_path }');"
@@ -172,15 +173,12 @@ class GamesController < ApplicationController
     end
   end
 
-  def opponent_decision
-
+  def opponent_ready
     @game = Game.find(params[:game_id])
     @initiator = User.find params[:initiator_id]
     @opponent  = User.find params[:opponent_id]
 
     if params[:answer] == "true"
-      @opponent.update_availability(false)
-
       @game.update_attribute(:opponent_accepted, true)
 
       PrivatePub.publish_to("/games/opponent_decision/#{@game.id}", 

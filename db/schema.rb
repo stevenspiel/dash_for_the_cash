@@ -34,8 +34,9 @@ ActiveRecord::Schema.define(version: 20140731015452) do
   create_table "games", force: true do |t|
     t.integer  "initiator_id"
     t.integer  "opponent_id"
-    t.boolean  "opponent_accepted", default: false
+    t.boolean  "opponent_ready", default: false
     t.integer  "winner_id"
+    t.integer  "wager",          default: 1
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -69,11 +70,13 @@ ActiveRecord::Schema.define(version: 20140731015452) do
 
   create_table "users", force: true do |t|
     t.string   "name"
+    t.integer  "money",            default: 1
+    t.integer  "tier_preference",  default: 1
     t.string   "provider"
     t.string   "uid"
     t.string   "oauth_token"
     t.datetime "oauth_expires_at"
-    t.boolean  "available",        default: true
+    t.boolean  "available",        default: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
